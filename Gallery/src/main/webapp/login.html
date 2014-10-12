@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+	<!--
+		Do NOT remove this!  This value will be checked for in the AJAX portion to
+		tell the app that a session timeout has occurred.  This could be any value,
+		but it needs to be recognizable.  I chose this specific value arbitrarily, 
+		because it would almost definately be unique (UUID).
+		
+		3ff0f1a0-3f31-11e4-916c-0800200c9a66  
+	-->
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Login Page</title>
+		<style type="text/css" title="text/css">
+		@import "/dojo1.10.0src/dojo/resources/dojo.css";
+		@import	"/dojo1.10.0src/dijit/themes/claro/claro.css";
+		@import	"/dojo1.10.0src/dojox/form/resources/CheckedMultiSelect.css";
+		</style>
+
+		<script type="text/javascript"
+			src="/dojo1.10.0src/dojo/dojo.js"
+			dojoConfig="isDebug:true,async:true"></script>
+		<script type="text/javascript">
+			require([ 
+				'dojo/parser', 
+				'dojo/domReady!', 
+				'dojox/validate',
+				'dojox/validate/us', 
+				'dojox/validate/web',
+	
+				/* basic dijit classes */
+				'dijit/form/TextBox', 
+				'dijit/form/ValidationTextBox',
+				'dijit/form/Button', 
+				'dijit/form/Form'
+			], function(parser) {
+				parser.parse();
+			});
+		</script>
+	</head>
+
+	<body class="claro">
+		<div style="padding: 20px;">
+			<h1 style="padding-bottom: 10px;">Log in to Application</h1>
+			<form id="myform" data-dojo-type="dijit/form/Form"	action="j_security_check" method="post">
+				<table cellpadding="0" cellspacing="2">
+					<tr>
+						<td valign="top"><strong>Login Name: </strong></td>
+						<td><input type="text" required="true" name="j_username"
+							id="j_username" placeholder="Login"
+							data-dojo-type="dijit/form/ValidationTextBox"
+							data-dojo-props='missingMessage:"Cannot login without a login name!"' />
+						</td>
+					</tr>
+					<tr>
+						<td valign="top"><strong>Website: </strong></td>
+						<td><input type="password" required="true" name="j_password"
+							id="j_password" placeholder="password"
+							data-dojo-type="dijit/form/ValidationTextBox"
+							data-dojo-props='missingMessage:"Cannot login without a password!"' />
+						</td>
+					</tr>
+					<tr>
+						<td><input type="submit" value="Submit Form" label="Submit Form" 
+							id="submitButton" 
+							data-dojo-type="dijit/form/Button" />
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>	
+		<h2>Result</h2>
+		<div id="response"></div>	
+	</body>
+</html>

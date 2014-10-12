@@ -1,0 +1,79 @@
+<html>
+<body>
+<h2>Configure the application</h2>
+
+<script>
+function getDisplay() {
+	var xmlhttp = new XMLHttpRequest();
+	var url = "./configureAdmin";
+	
+	xmlhttp.onreadystatechange = function() {
+	    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+	        var myData = JSON.parse(xmlhttp.responseText);
+	        handleDisplayData(myData);
+	    }
+	}
+	xmlhttp.open("POST", url, true);
+	xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+	xmlhttp.send();
+}
+
+function saveDisplay(form) {
+
+	var data = {};
+	
+	for(var idx=0;idx<form.elements.length;idx++){
+		var elem = form.elements[idx];
+		if('text' == elem.type){
+			data[elem.name] = elem.value;
+		}
+	}
+
+	var xmlhttp = new XMLHttpRequest();
+	var url = "./configureAdmin";
+	
+	xmlhttp.onreadystatechange = function() {
+	    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+	        var myData = JSON.parse(xmlhttp.responseText);
+	        handleDisplayData(myData);
+	    }
+	}
+	xmlhttp.open("POST", url, true);
+	xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+	var json = JSON.stringify(data);
+	xmlhttp.send(json);
+}
+
+function handleDisplayData(data) {
+	var dataTxt = "";
+	dataTxt += "<table border='1'>";
+	dataTxt += "<tr>";
+	dataTxt += "<th>Name</th>";
+	dataTxt += "<th>Value</th>";
+	dataTxt += "</tr>";
+	for(var configurationKey in data.data){
+		if (data.data.hasOwnProperty(configurationKey)) {
+			dataTxt += "<tr>";
+			dataTxt += "<td>"+configurationKey+"</td>";
+			dataTxt += "<td><input type='text' name='"+configurationKey + "' value = '"+data.data[configurationKey]+"'></input></td>";
+			dataTxt += "</tr>";
+		}
+	}
+	dataTxt += "</table>";
+    document.getElementById("id02").innerHTML = dataTxt;
+}
+
+getDisplay();
+</script>
+
+<div id="id01">
+</div>
+<form>
+<div id="id02">
+</div>
+<br>
+<input type="button" onclick="saveDisplay(this.form)" value="Save"></input>
+</form>
+<p><a href="../">Gallery</a></p>
+</body>
+</html>

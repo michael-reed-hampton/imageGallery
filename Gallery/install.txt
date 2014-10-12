@@ -1,0 +1,55 @@
+On the centos server
+
+	I have apache httpd running.
+	
+		in /etc/httpd/conf/httpd.conf, I have the following to allow access to solr, tomcat and dojo
+	
+		ProxyPass         /gallery  http://localhost:8080/gallery
+		ProxyPassReverse  /gallery  http://localhost:8080/gallery
+		
+		ProxyPass         /dojo1.10.0src  http://localhost:8080/dojo1.10.0src
+		ProxyPassReverse  /dojo1.10.0src  http://localhost:8080/dojo1.10.0src
+
+		ProxyPass         /solr  http://localhost:8983/solr
+		ProxyPassReverse  /solr  http://localhost:8983/solr
+
+		
+	I have tomcat8 running, apache is handling it on port 80.
+		it is at /usr/local/tomcat8
+	I have solr running in a jetty instance.
+	 	SOLR: 
+			ftp://ftp.mirrorservice.org/sites/ftp.apache.org/lucene/solr/4.10.1/solr-4.10.1.tgz
+			to
+			/home/mike.hampton/Downloads
+			
+			I Unzipped/untarred it to /usr/local/solr-4.10.1
+				in a terminal, I sudo to a new shell to become root
+					sudo bash
+					cd /usr/local
+					tar -zxvf /home/mike.hampton/Downloads/solr-4.10.1.tgz
+	
+			I copied solr-image-index.zip to the linux machine, and unzipped it to /usr/local/solr-image-index
+				cd /usr/local 
+				unzip /media/MyPassport/data/solr-image-index.zip
+	
+			I made the command script to start solr: solr-image-index/runSolr.sh
+				Made sure it was executable
+					chmod +x solr-image-index/runSolr.sh
+				This has the correct paths to use this directory, plus one additional property '-Dsolr.appDir="K:/solr-4.10.0"'.  This is used below.
+	
+			I made the command script to stop solr: solr-image-index/stopSolr.sh	
+				Made sure it was executable
+					chmod +x solr-image-index/stopSolr.sh
+	
+			Had to add the line
+			"192.168.1.110 ISS203716" to /etc/hosts, because it was not already there.
+			
+			http://localhost:8983/solr is the web interface		
+
+The gallery web app (K:\research\imageGallery\Gallery\target\Gallery.war) is copied  to /usr/local/tomcat8/mrh_webapps		
+		
+		
+		
+			
+	
+	

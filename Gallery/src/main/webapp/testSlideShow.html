@@ -1,0 +1,38 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Image Browser and Search</title>
+		<link rel="stylesheet" href="style/style.css" media="screen">
+		<link rel="stylesheet" href="style/gallery.css" media="screen">
+		<link rel="stylesheet" href="/dojo1.10.0src/dijit/themes/claro/claro.css" media="screen">
+		<style type="text/css">
+			@import "/dojo1.10.0src/dojox/image/resources/image.css";
+		</style>
+		<script>
+	        // Instead of using data-dojo-config, we're creating a dojoConfig
+	        // object *before* we load dojo.js; they're functionally identical,
+	        // it's just easier to read this approach with a larger configuration.
+	        var dojoConfig = {
+	            // async: true,
+	            isDebug: true,
+	            parseOnLoad:true,
+	            // This code registers the correct location of the "demo"
+	            // package so we can load Dojo from the CDN whilst still
+	            // being able to load local modules
+	            packages: [{
+	                name: "gallery",
+	                location: location.pathname.replace(/\/[^/]*$/, '') + '/gallery'
+	            }]
+	        };
+	    </script>
+	    <script type="text/javascript" src="/dojo1.10.0src/dojox/mobile/deviceTheme.js"
+        	data-dojo-config="mblThemeFiles: ['base','Carousel','PageIndicator']"></script>
+		<script src="/dojo1.10.0src/dojo/dojo.js"></script>
+		<script src="app/testSlideShow.js"></script>
+	</head>
+
+	<body class="claro">
+	</body>
+</html>

@@ -1,0 +1,67 @@
+<html>
+<body>
+<h2>Hello World!</h2>
+
+<script>
+
+function SearchCriteria () {
+}
+
+function getDisplay(dir) {
+	var xmlhttp = new XMLHttpRequest();
+	var url = "./display";
+	
+	xmlhttp.onreadystatechange = function() {
+	    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+	        var myData = JSON.parse(xmlhttp.responseText);
+	        myFunction(myData);
+	    }
+	}
+	xmlhttp.open("POST", url, true);
+	xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+	
+	var criteria = new SearchCriteria();
+	criteria.directory = dir;
+	var json = JSON.stringify(criteria);
+	xmlhttp.send(json);
+}
+
+function myFunction(data) {
+	var statusTxt = "<p>Success:" + data.status.success + "</p>";
+	statusTxt += "<p>Description:" + data.status.description + "</p>";
+    document.getElementById("id01").innerHTML = statusTxt;
+
+	var dataTxt = "<p onclick='getDisplay(\"/\")'>Root</p>";
+	dataTxt += "<table>";
+	dataTxt += "<tr>";
+	dataTxt += "<th>Name</th>";
+	dataTxt += "<th>Path</th>";
+	dataTxt += "<th>Type</th>";
+	dataTxt += "<th>Link</th>";
+	dataTxt += "</tr>";
+	for(var idx=0;idx<data.data.length;idx++){
+		dataTxt += "<tr>";
+		dataTxt += "<td>"+data.data[idx].name+"</td>";
+		dataTxt += "<td>"+data.data[idx].path+"</td>";
+		dataTxt += "<td>"+data.data[idx].type+"</td>";
+		if(data.data[idx].type == "dir"){
+			dataTxt += "<td onclick='getDisplay(\""+data.data[idx].path+"\")'>link</td>";
+		}
+		else{
+			dataTxt += "<td><a href='./image"+data.data[idx].path+"'><img src='./thumbnail"+data.data[idx].path+"'></img></a></td>";
+		}		
+		dataTxt += "</tr>";
+	}
+	dataTxt += "</table>";
+    document.getElementById("id02").innerHTML = dataTxt;
+}
+
+getDisplay("/");
+</script>
+
+<div id="id01">
+</div>
+<div id="id02">
+</div>
+</body>
+</html>

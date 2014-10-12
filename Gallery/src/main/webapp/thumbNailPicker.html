@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html >
+<head>
+
+	<link rel="stylesheet" href="/dojo1.10.0src/dijit/themes/claro/claro.css">
+	<style type="text/css">
+		@import "/dojo1.10.0src/dojox/image/resources/image.css";
+	</style>
+	<script>dojoConfig = {parseOnLoad: true}</script>
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<script src='/dojo1.10.0src/dojo/dojo.js'></script>
+
+	<script>
+require(["dojo/_base/kernel"], function(dojo){
+    dojo.require("dojo.parser");
+    dojo.require("dojox.image.ThumbnailPicker");
+    dojo.require("dojox.data.FlickrRestStore");
+
+    dojo.ready(function(){
+        // Create a new FlickrRestStore
+        var flickrRestStore = new dojox.data.FlickrRestStore();
+        // Flickr has changed to https (SSL) only
+        flickrRestStore._flickrRestUrl="https://www.flickr.com/services/rest/";
+
+        // Create a request object, containing a query with the
+        // userid, apikey and (optional) sort data.
+        // Extra query parameters 'tags' and 'tag_mode' are also
+        // used to further filter the results
+        var req = {
+           query: {
+               userid: "69455698@N00",
+               apikey: "117a5067b9e32b2c6be902dc1c9ae40f"
+           },
+           start: 0, // start at record 0
+           count: 20 // request 20 records each time a request is made
+        };
+
+        // Set the flickr data store on two of the dojox.image.ThumbnailPicker widgets
+        dijit.byId('thumbPicker1').setDataStore(flickrRestStore, req);
+    });
+});
+	</script>
+</head>
+<body class="claro">
+    <h2>From FlickrRestStore:</h2>
+    
+Might put together an adapter to flickr later...    
+    
+This ThumbnailPicker should have 4 thumbnails, witheach of them linking
+to a URL when clicked on, changing the current page.  The cursor should also change when over an image.
+The widget is laid out in the default horizontal layout.
+
+<br>DojoTestApp</br>
+<br>Key:117a5067b9e32b2c6be902dc1c9ae40f</br>
+<br>Secret:8704abc816d43666</br>
+<br>id: 69455698@N00</br>
+
+
+<div id="thumbPicker1" data-dojo-type="dojox/image/ThumbnailPicker" data-dojo-props="numberThumbs:4, useHyperlink:true,
+hyperlinkTarget:this"></div>
+</body>
+</html>

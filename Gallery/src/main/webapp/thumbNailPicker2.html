@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html >
+<head>
+
+	<link rel="stylesheet" href="/dojo1.10.0src/dijit/themes/claro/claro.css">
+	<style type="text/css">
+		@import "/dojo1.10.0src/dojox/image/resources/image.css";
+	</style>
+	<script>
+        // Instead of using data-dojo-config, we're creating a dojoConfig
+        // object *before* we load dojo.js; they're functionally identical,
+        // it's just easier to read this approach with a larger configuration.
+        var dojoConfig = {
+            isDebug: true,
+            parseOnLoad:true,
+            // This code registers the correct location of the "demo"
+            // package so we can load Dojo from the CDN whilst still
+            // being able to load local modules
+            packages: [{
+                name: "gallery",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/gallery'
+            }]
+        };
+    </script>
+	
+	<script src='/dojo1.10.0src/dojo/dojo.js'></script>
+	
+	<script>
+require([
+         "dojo/_base/kernel"
+    ], function(dojo){
+    dojo.require("dojo.parser");
+    dojo.require("dojox.image.ThumbnailPicker");
+    dojo.require("gallery.GalleryItemStore2");
+
+    dojo.ready(function(){
+    	var galleryItemStore = new gallery.GalleryItemStore2({
+			target:"./rest/dojoSearch",
+			query: ""
+		});
+        var request = {
+                start: 0, // start at record 0
+                count: 20 // request 20 records each time a request is made
+             };
+    	dijit.byId('thumbPicker1').setDataStore(galleryItemStore, request);
+    });
+});
+	</script>
+</head>
+<body class="claro">
+    <h1>Trying out the ThumbnailPicker</h1>
+	<div id="thumbPicker1" data-dojo-type="dojox/image/ThumbnailPicker" 
+		data-dojo-props="numberThumbs:4, useHyperlink:true,hyperlinkTarget:this"></div>
+</body>
+</html>

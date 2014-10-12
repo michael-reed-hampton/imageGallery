@@ -1,0 +1,46 @@
+* {
+    outline: none !important;
+}
+
+.thumbnailImage
+{
+    margin: 2;
+    padding: 2px;
+	border: 1px solid #769DC0;
+}
+
+.thumbnailImage:hover {
+	background-color: #AFD9FF;
+	color: #000000;
+	cursor: pointer; 
+	cursor: hand;
+}
+
+.mblCarouselItem {
+	/* text-align: center; */
+	/* -webkit-tap-highlight-color: rgba(255, 255, 255, 0); */
+	background-color: #6d6d6d;
+}
+
+.mblCarousel {
+	height: 100%;
+} 
+
+/* 
+The following two are weird.
+I want the Carousel to be full height, but
+this causes a problem with the thumbnail sheet,
+which I want to have a vertical scrollbar if needed 
+*/
+.dijitStackContainerChildWrapper {
+	height: 100%;
+	overflow: auto;
+}
+
+[aria-label="Slide Show"]{
+	height: 100%;
+	overflow: hidden;
+} 
+
+ 
+

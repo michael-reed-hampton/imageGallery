@@ -1,0 +1,262 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+	<display-name>Archetype Created Web Application</display-name>
+	
+    <context-param>
+        <param-name>defaultKey</param-name>
+        <param-value>default</param-value>
+        <description>A Default key for configuration values</description>
+    </context-param>
+
+	<filter>
+		<filter-name>Configuration Check</filter-name>
+		<description>
+			Used to redirect the application if it is not configured.
+		</description>
+		<filter-class>name.hampton.mike.gallery.servlet.ConfigurationCheckFilter</filter-class>
+		<init-param>
+			<param-name>configurationPath0</param-name>
+			<param-value>./admin/configure.html</param-value>
+			<description>
+				This is the path that the user is redirected to if the application is not configured, and they 
+				are in the matching 'roleN' role configured as another 'init-param'.  The 'configurationPathN'
+				and 'roleN' init-params are prioritized by number, with the lower number (0) taking precedence 
+				over the higher number.  So the highest precedence is 0. 
+				
+				In this case, the 'role0' below is 'galleryAdmin', so if the user is in the role 'galleryAdmin'
+				then they would be redirected to ./admin/configure.html 
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>role0</param-name>
+			<param-value>galleryAdmin</param-value>
+		</init-param>
+		<init-param>
+			<param-name>checkMajorKey0</param-name>
+			<param-value>default</param-value>
+		</init-param>		
+		<init-param>
+			<param-name>checkConfigurationKey0</param-name>
+			<param-value>baseDir</param-value>
+		</init-param>		
+		<init-param>
+			<param-name>configurationPath1</param-name>
+			<param-value>./configure.html</param-value>
+			<description>
+				This is the path that the user is redirected to if the application is not configured, and they 
+				are in the matching 'roleN' role configured as another 'init-param'.  The 'configurationPathN'
+				and 'roleN' init-params are prioritized by number, with the lower number (0) taking precedence 
+				over the higher number.  So the highest precedence is 0. 
+				
+				In this case, the 'role1' below is 'gallery', so if the user is in the role 'gallery'
+				then they would be redirected to ./configure.html 
+			</description>
+		</init-param>
+		<init-param>
+			<param-name>role1</param-name>
+			<param-value>gallery</param-value>
+		</init-param>
+		<init-param>
+			<param-name>checkMajorKey1</param-name>
+			<param-value>{request.userPrincipal.name}</param-value>
+			<description>The syntax of the value above is intended to be flexible, but the class does not make full use of it.</description>
+		</init-param>		
+		<init-param>
+			<param-name>checkConfigurationKey1</param-name>
+			<param-value>baseDir</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>Configuration Check</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>	
+	
+	<listener>
+	  <listener-class>
+	    name.hampton.mike.gallery.servlet.ApplicationListener
+	  </listener-class>	  
+  	</listener>
+	
+	<servlet>
+		<servlet-name>logout</servlet-name>
+		<display-name>Logout Servlet</display-name>
+		<servlet-class>name.hampton.mike.gallery.servlet.LogoutServlet</servlet-class>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>display</servlet-name>
+		<display-name>Directory Display Servlet</display-name>
+		<description>An 'OLD' implementation that uses GSON (Google JSON) to return JSON from a servlet.</description>
+		<servlet-class>name.hampton.mike.gallery.servlet.DirectoryDisplayServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>Jersey REST Web Application</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>name.hampton.mike.gallery.rest</param-value>
+		</init-param>
+		<init-param>
+			<param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>configure</servlet-name>
+		<display-name>Configuration Servlet</display-name>
+		<description>An old style servlet that uses GSON (GoogleJSON) to save values from a form</description>
+		<servlet-class>name.hampton.mike.gallery.servlet.ConfigureServlet</servlet-class>
+		<init-param>
+			<param-name>configurationKeys</param-name>
+			<param-value>baseDir,thumbnailDir,defaultThumbnail,thumbnailWidth,thumbnailHeight</param-value>
+		</init-param>
+		<!-- 
+		<init-param>
+			<param-name>defaultKey</param-name>
+			<param-value>default</param-value>
+		</init-param>
+		-->
+	</servlet>
+
+	<servlet>
+		<servlet-name>adminConfigure</servlet-name>
+		<display-name>Admin Configuration Servlet</display-name>
+		<description>An old style servlet that uses GSON (GoogleJSON) to save values from a form</description>
+		<servlet-class>name.hampton.mike.gallery.servlet.AdminConfigureServlet</servlet-class>
+		<init-param>
+			<param-name>configurationKeys</param-name>
+			<param-value>baseDir,thumbnailDir,defaultThumbnail,thumbnailWidth,thumbnailHeight,solrURL</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet>
+		<servlet-name>metaDataExample</servlet-name>
+		<display-name>MetaData Example</display-name>
+		<servlet-class>name.hampton.mike.gallery.servlet.MetadataExampleServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fileServlet</servlet-name>
+		<servlet-class>name.hampton.mike.gallery.servlet.FileServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>thumbnailServlet</servlet-name>
+		<servlet-class>name.hampton.mike.gallery.servlet.ThumbnailServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>logout</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>display</servlet-name>
+		<url-pattern>/display</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>Jersey REST Web Application</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>configure</servlet-name>
+		<url-pattern>/configure</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>adminConfigure</servlet-name>
+		<url-pattern>/admin/configureAdmin</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>metaDataExample</servlet-name>
+		<url-pattern>/metaDataExample</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>fileServlet</servlet-name>
+		<url-pattern>/image/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>thumbnailServlet</servlet-name>
+		<url-pattern>/thumbnail/*</url-pattern>
+	</servlet-mapping>
+
+	<session-config>
+		<session-timeout>60</session-timeout>
+	</session-config>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>All Access</web-resource-name>
+			<url-pattern>/*</url-pattern>
+			<http-method>DELETE</http-method>
+			<http-method>PUT</http-method>
+			<http-method>HEAD</http-method>
+			<http-method>OPTIONS</http-method>
+			<http-method>TRACE</http-method>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>gallery</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>NONE</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>All Access</web-resource-name>
+			<url-pattern>/admin/*</url-pattern>
+			<http-method>DELETE</http-method>
+			<http-method>PUT</http-method>
+			<http-method>HEAD</http-method>
+			<http-method>OPTIONS</http-method>
+			<http-method>TRACE</http-method>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>galleryAdmin</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>NONE</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+	
+	<!-- <login-config> <auth-method>BASIC</auth-method> <realm-name>default</realm-name> 
+		</login-config> -->
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<realm-name>default</realm-name>
+		<form-login-config>
+			<form-login-page>/login.html</form-login-page>
+			<form-error-page>/login.html</form-error-page>
+		</form-login-config>
+	</login-config>
+
+	<!-- Security roles referenced by this web application -->
+	<security-role>
+		<role-name>gallery</role-name>
+	</security-role>
+	<security-role>
+		<role-name>galleryAdmin</role-name>
+	</security-role>	
+
+</web-app>
