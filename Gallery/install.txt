@@ -46,10 +46,4 @@ On the centos server
 			
 			http://localhost:8983/solr is the web interface		
 
-The gallery web app (K:\research\imageGallery\Gallery\target\Gallery.war) is copied  to /usr/local/tomcat8/mrh_webapps		
-		
-		
-		
-			
-	
-	
+The gallery web app (K:\research\imageGallery\Gallery\target\Gallery.war) is copied  to /usr/local/tomcat8/mrh_webapps
