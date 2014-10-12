@@ -88,13 +88,6 @@
 	</servlet>
 	
 	<servlet>
-		<servlet-name>display</servlet-name>
-		<display-name>Directory Display Servlet</display-name>
-		<description>An 'OLD' implementation that uses GSON (Google JSON) to return JSON from a servlet.</description>
-		<servlet-class>name.hampton.mike.gallery.servlet.DirectoryDisplayServlet</servlet-class>
-	</servlet>
-
-	<servlet>
 		<servlet-name>Jersey REST Web Application</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
@@ -117,12 +110,6 @@
 			<param-name>configurationKeys</param-name>
 			<param-value>baseDir,thumbnailDir,defaultThumbnail,thumbnailWidth,thumbnailHeight</param-value>
 		</init-param>
-		<!-- 
-		<init-param>
-			<param-name>defaultKey</param-name>
-			<param-value>default</param-value>
-		</init-param>
-		-->
 	</servlet>
 
 	<servlet>
@@ -134,12 +121,6 @@
 			<param-name>configurationKeys</param-name>
 			<param-value>baseDir,thumbnailDir,defaultThumbnail,thumbnailWidth,thumbnailHeight,solrURL</param-value>
 		</init-param>
-	</servlet>
-
-	<servlet>
-		<servlet-name>metaDataExample</servlet-name>
-		<display-name>MetaData Example</display-name>
-		<servlet-class>name.hampton.mike.gallery.servlet.MetadataExampleServlet</servlet-class>
 	</servlet>
 
 	<servlet>
@@ -158,11 +139,6 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>display</servlet-name>
-		<url-pattern>/display</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
 		<servlet-name>Jersey REST Web Application</servlet-name>
 		<url-pattern>/rest/*</url-pattern>
 	</servlet-mapping>
@@ -175,11 +151,6 @@
 	<servlet-mapping>
 		<servlet-name>adminConfigure</servlet-name>
 		<url-pattern>/admin/configureAdmin</url-pattern>
-	</servlet-mapping>
-
-	<servlet-mapping>
-		<servlet-name>metaDataExample</servlet-name>
-		<url-pattern>/metaDataExample</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
@@ -240,8 +211,6 @@
 		</user-data-constraint>
 	</security-constraint>
 	
-	<!-- <login-config> <auth-method>BASIC</auth-method> <realm-name>default</realm-name> 
-		</login-config> -->
 	<login-config>
 		<auth-method>FORM</auth-method>
 		<realm-name>default</realm-name>

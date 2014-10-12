@@ -1,6 +1,0 @@
-{
-    "items": [
-        { "src": "testData/family002.jpg", "value": "familyValue", "headerText": "familyHeader" },
-        { "src": "testData/myFace.jpg", "value": "myFaceValue", "headerText": "myFaceHeader" }
-    ]
-}

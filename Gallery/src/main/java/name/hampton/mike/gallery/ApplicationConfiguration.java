@@ -43,8 +43,7 @@ public class ApplicationConfiguration {
 		configFile = new File(tempDir, "galleryConfig.json");
 		System.out.println("*************************************************************************************************");
 		System.out.println("ApplicationConfiguration is being obtained from configFile='" + configFile.getAbsolutePath() +
-				"' + this is currently HARDCODED  in " + this.getClass().getName() + ", (yeah, I know...) so to change it "
-						+ "you need to reploace this implementation.");
+				"' + this is currently coded to save files in the temp dir in the class " + this.getClass().getName() + ".");
 		System.out.println("*************************************************************************************************");
 		loadThis();
 	}

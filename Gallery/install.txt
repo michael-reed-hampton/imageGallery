@@ -1,3 +1,7 @@
+This is a we application, so deployments can be done in a numebr of ways.
+
+My test rig is a CentOS Linux server.
+
 On the centos server
 
 	I have apache httpd running.
@@ -14,9 +18,10 @@ On the centos server
 		ProxyPassReverse  /solr  http://localhost:8983/solr
 
 		
-	I have tomcat8 running, apache is handling it on port 80.
-		it is at /usr/local/tomcat8
+	I have tomcat8 running
+		This is where I have the Gallery deployed, and I have dojo deployed there as well.
 	I have solr running in a jetty instance.
+		I was not looking for elegance here, but a simple way to have SOLR running, so this was my solution.	
 	 	SOLR: 
 			ftp://ftp.mirrorservice.org/sites/ftp.apache.org/lucene/solr/4.10.1/solr-4.10.1.tgz
 			to
@@ -46,4 +51,3 @@ On the centos server
 			
 			http://localhost:8983/solr is the web interface		
 
-The gallery web app (K:\research\imageGallery\Gallery\target\Gallery.war) is copied  to /usr/local/tomcat8/mrh_webapps

@@ -21,14 +21,11 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SOLRIndexerTest extends TestCase {
+public class SOLRIndexerTest {
 	
 	// look at http://lucidworks.com/blog/indexing-with-solrj/
 	static Logger logger = LoggerFactory.getLogger(SOLRIndexerTest.class.getName());
 
-	public void testWatchDir() throws SolrServerException, IOException{
-	}
-	
 	public static void main(String s[]) throws IOException {
 		final String pathString = "C:\\Users\\mike.hampton\\Pictures\\temp";
 		final SOLRIndexer indexer = new SOLRIndexer("http://localhost:8983/solr", pathString);
