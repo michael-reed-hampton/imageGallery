@@ -68,7 +68,13 @@ How I have been testing
 Build from eclipse (K:\research\scratchEclipseWorkspace - this is the 'Gallery' project) using maven (mvn clean install)
 
        	
-I have been running this on jetty and Tomcat.  
+I have been running this on jetty and Tomcat.
+
+	SOLR
+	--------
+	Need to start solr first.  Currently using a simple install of solr.
+	cd /d K:\research\solr-image-index
+	runSolr  
 
 	Jetty
 	-----
@@ -84,7 +90,7 @@ I have been running this on jetty and Tomcat.
 	------	
 	In a command prompt.
 	cd /D K:\apache-tomcat-8.0.12\bin
-	start startupRemoteDebug.bat	
+	startupRemoteDebug.bat	
 	
 	Tomcat has a context (K:\apache-tomcat-8.0.12\conf\Catalina\localhost\gallery.xml) that points to the target directory of the deployment, so
 	just right-click on the "Gallery" project and select "Run As > Maven Install".  Tomcat will redeploy it in a second or two.  I have also deployed
@@ -231,6 +237,7 @@ Search.
 SOLR
 	Startup indexing and directory monitoring for reindexing/deletions - done!	
 
+Changed dojo urls to use google for now.  I saved a copy of the index.html and login.html, but all they have is the local dojo url 
 
 Currently working on:
 -----------------------

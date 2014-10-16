@@ -1,4 +1,11 @@
-This is a we application, so deployments can be done in a numebr of ways.
+
+
+
+
+
+
+
+This is a web application, so deployments can be done in a numebr of ways.
 
 My test rig is a CentOS Linux server.
 

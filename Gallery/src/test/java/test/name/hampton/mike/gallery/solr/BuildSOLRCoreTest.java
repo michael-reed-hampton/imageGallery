@@ -12,6 +12,17 @@ import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
+
+
+/**
+ * This is not a unit test but an integration test.
+ * 
+ * This requires that solr be running on http://localhost:8983/solr, and that  it is set up per the 
+ * solr-image-index.zip in this project. 
+ * 
+ * @author mike.hampton
+ *
+ */
 public class BuildSOLRCoreTest extends TestCase {
 	
 	// look at http://lucidworks.com/blog/indexing-with-solrj/
