@@ -77,7 +77,7 @@
 	
 	<listener>
 	  <listener-class>
-	    name.hampton.mike.gallery.servlet.ApplicationListener
+	    name.hampton.mike.gallery.solr.SolrInitApplicationListener
 	  </listener-class>	  
   	</listener>
 	
@@ -125,7 +125,8 @@
 
 	<servlet>
 		<servlet-name>fileServlet</servlet-name>
-		<servlet-class>name.hampton.mike.gallery.servlet.FileServlet</servlet-class>
+		<!--  servlet-class>name.hampton.mike.gallery.servlet.FileServlet</servlet-class -->
+		<servlet-class>name.hampton.mike.gallery.servlet.StatusNotifierFileServlet</servlet-class>
 	</servlet>
 
 	<servlet>

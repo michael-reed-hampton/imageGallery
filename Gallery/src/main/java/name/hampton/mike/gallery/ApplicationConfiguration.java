@@ -2,7 +2,11 @@ package name.hampton.mike.gallery;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import name.hampton.mike.gallery.solr.SOLRConfigurationListener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,6 +37,9 @@ public class ApplicationConfiguration {
 	private String defaultKey;
 	File configFile = null;
 	
+	List<ConfigurationListener> configurationListeners = new ArrayList<ConfigurationListener>();
+
+	
 	public static ApplicationConfiguration getSingleton() {
 		return singleton;
 	}
@@ -46,14 +53,20 @@ public class ApplicationConfiguration {
 				"' + this is currently coded to save files in the temp dir in the class " + this.getClass().getName() + ".");
 		System.out.println("*************************************************************************************************");
 		loadThis();
+		
+		configurationListeners.add(new SOLRConfigurationListener());
 	}
-
+	
 	public HashMap<String, Object> getConfiguration() {
 		return configuration;
 	}
 
 	public void setDefaultConfigurationKey(String defaultKey) {
 		this.defaultKey = defaultKey;
+	}
+
+	public String getDefaultConfigurationKey() {		
+		return defaultKey;
 	}
 
 	public String setConfigurationValue(String majorKey, String configurationKey, String configurationValue) {
@@ -100,8 +113,7 @@ public class ApplicationConfiguration {
 		try {
 			System.out.println("*************************************************************************************************");
 			System.out.println("ApplicationConfiguration is being obtained from configFile='" + configFile.getAbsolutePath() +
-					"' + this is currently HARDCODED  in " + this.getClass().getName() + ", (yeah, I know...) so to change it "
-							+ "you need to reploace this implementation.");
+					"' + this is currently coded to save files in the temp dir in the class " + this.getClass().getName() + ".");
 			System.out.println("*************************************************************************************************");
 			mapper.writeValue(configFile, configuration);
 		} catch (IOException e) {
@@ -115,12 +127,33 @@ public class ApplicationConfiguration {
 		try {
 			System.out.println("*************************************************************************************************");
 			System.out.println("ApplicationConfiguration is being obtained from configFile='" + configFile.getAbsolutePath() +
-					"' + this is currently HARDCODED  in " + this.getClass().getName() + ", (yeah, I know...) so to change it "
-							+ "you need to reploace this implementation.");
+					"' + this is currently coded to save files in the temp dir in the class " + this.getClass().getName() + ".");
 			System.out.println("*************************************************************************************************");
 			configuration = mapper.readValue(configFile, configuration.getClass());		
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
 	}
+
+	public void postConfigurationChangeEvent(ConfigurationChangeEvent event) {
+		for(ConfigurationListener listener: configurationListeners){
+			new Thread(new ConfigurationListenerRunnable(listener, event)).start();
+		}
+	}
+	
+	class ConfigurationListenerRunnable implements Runnable {
+		ConfigurationListener listener;
+		ConfigurationChangeEvent event;
+		
+		ConfigurationListenerRunnable(ConfigurationListener listener, ConfigurationChangeEvent event){
+			this.listener = listener;
+			this.event = event;
+		}
+		
+		@Override
+		public void run() {
+			listener.configurationChanged(event);	
+		}
+	}
+
 }

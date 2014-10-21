@@ -1,4 +1,4 @@
-package name.hampton.mike.gallery.servlet;
+package name.hampton.mike.gallery.solr;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,26 +12,26 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import name.hampton.mike.gallery.ApplicationConfiguration;
-import name.hampton.mike.gallery.solr.BuildSOLRCore;
-import name.hampton.mike.gallery.solr.SOLRIndexingEvent;
+import name.hampton.mike.gallery.exception.InvalidConfigurationException;
+import name.hampton.mike.search.SearchException;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Initializes anything that needs to be initialized
+ * Initializes anything that needs to be initialized.
  * 
- * Reindexes any solr cores as needed.
+ * Reindexes any solr cores as needed.  Makes checks against the configuration for
+ * all the indexes.
  * 
  * 
  * @author mike.hampton
  *
  */
-public class ApplicationListener implements ServletContextListener {
+public class SolrInitApplicationListener implements ServletContextListener {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-	
 
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
@@ -79,7 +79,7 @@ public class ApplicationListener implements ServletContextListener {
 					BuildSOLRCore solrCoreBuilder = new BuildSOLRCore(solrURL);
 					solrCoreBuilder.addObserver(observer);
 					
-					// This should be done threaded.  This might mean doing it with jms, or on a nother machine - etc.					
+					// This should be done threaded.  This might mean doing it with jms, or on another machine - etc.					
 					Thread coreBuilderThread = new Thread(new SOLRInitTask(solrCoreBuilder, myBaseDir));
 					coreBuilderThread.start();
 					
@@ -119,6 +119,10 @@ public class ApplicationListener implements ServletContextListener {
 			} catch (SolrServerException e) {
 			      logger.error("Error in Application initialization, could not build/reindex solr for path = '" + pathToIndex, e);
 			} catch (IOException e) {
+			      logger.error("Error in Application initialization, could not build/reindex solr for path = '" + pathToIndex, e);
+			} catch (InvalidConfigurationException e) {
+			      logger.error("Error in Application initialization, could not build/reindex solr for path = '" + pathToIndex, e);
+			} catch (SearchException e) {
 			      logger.error("Error in Application initialization, could not build/reindex solr for path = '" + pathToIndex, e);
 			}
 		}

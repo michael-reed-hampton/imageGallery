@@ -1,36 +1,5 @@
 package name.hampton.mike;
 
-/*
- * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- *   - Neither the name of Oracle nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 import java.nio.file.*;
 import java.nio.file.WatchEvent.Kind;
 
@@ -45,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Example to watch a directory (or tree) for changes to files.
+ * Watch a directory (or tree) for changes to files.
  */
 
 public abstract class WatchDir {
@@ -207,51 +176,4 @@ public abstract class WatchDir {
 	public abstract void handleModify(WatchEvent<Path> event, Path child);
 
 	public abstract void handleOverflow(WatchEvent<Path> event, Path child);
-
-	static void usage() {
-        System.err.println("usage: java WatchDir [-r] dir");
-        System.exit(-1);
-    }
-
-    public static void main(String[] args) throws IOException {
-        // parse arguments
-        if (args.length == 0 || args.length > 2)
-            usage();
-        boolean recursive = false;
-        int dirArg = 0;
-        if (args[0].equals("-r")) {
-            if (args.length < 2)
-                usage();
-            recursive = true;
-            dirArg++;
-        }
-
-        // register directory and process its events
-        Path dir = Paths.get(args[dirArg]);
-        WatchDir watchdir = new WatchDir(dir, recursive){
-
-			@Override
-			public void handleDelete(WatchEvent<Path> event, Path child) {
-        	 	System.out.format("%s: %s %s\n", event.kind().name(), child, new Date(child.toFile().lastModified()).toString() );
-			}
-
-			@Override
-			public void handleCreate(WatchEvent<Path> event, Path child) {
-        	 	System.out.format("%s: %s %s\n", event.kind().name(), child, new Date(child.toFile().lastModified()).toString() );
-			}
-
-			@Override
-			public void handleModify(WatchEvent<Path> event, Path child) {
-            	if( System.currentTimeMillis()-child.toFile().lastModified() < 1000){
-            	 	System.out.format("%s: %s %s\n", event.kind().name(), child, new Date(child.toFile().lastModified()).toString() );
-            	}
-			}
-
-			@Override
-			public void handleOverflow(WatchEvent<Path> event, Path child) {
-        	 	System.out.format("%s: %s %s\n", event.kind().name(), child, new Date(child.toFile().lastModified()).toString() );
-			}
-        };
-        watchdir.processEvents();
-    }
 }

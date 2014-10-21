@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
@@ -14,7 +15,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
-import junit.framework.TestCase;
 import name.hampton.mike.gallery.solr.SOLRIndexer;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -27,8 +27,8 @@ public class SOLRIndexerTest {
 	static Logger logger = LoggerFactory.getLogger(SOLRIndexerTest.class.getName());
 
 	public static void main(String s[]) throws IOException {
-		final String pathString = "C:\\Users\\mike.hampton\\Pictures\\temp";
-		final SOLRIndexer indexer = new SOLRIndexer("http://localhost:8983/solr", pathString);
+		final File pathString = new File("C:\\Users\\mike.hampton\\Pictures\\temp");
+		final SOLRIndexer indexer = new SOLRIndexer("http://localhost:8983/solr", pathString.getCanonicalPath());
 		
 		Observer observer = new Observer(){
 			@Override

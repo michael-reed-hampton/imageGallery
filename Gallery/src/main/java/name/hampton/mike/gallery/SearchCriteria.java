@@ -27,9 +27,9 @@ public class SearchCriteria {
 
 	private String freeText;
 
-	private int startIndex = 0;
-	private int numberOfRowsToReturn = 10;
-	private List<String> sortFields = null;
+	private int startIndex = -1;
+	private int numberOfRowsToReturn = -1;
+	private List<SortField> sortFields = null;
 
 	/**
 	 * The directory to start from.  If not specified, the root is assumed.
@@ -103,11 +103,11 @@ public class SearchCriteria {
 		this.numberOfRowsToReturn = numberOfRowsToReturn;
 	}
 
-	public List<String> getSortFields() {
+	public List<SortField> getSortFields() {
 		return sortFields;
 	}
 
-	public void setSortFields(List<String> sortFields) {
+	public void setSortFields(List<SortField> sortFields) {
 		this.sortFields = sortFields;
 	}
 

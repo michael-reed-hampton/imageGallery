@@ -8,6 +8,9 @@ import java.util.Observable;
 import java.util.Observer;
 
 import name.hampton.mike.UnzipUtility;
+import name.hampton.mike.gallery.exception.InvalidConfigurationException;
+import name.hampton.mike.search.SearchException;
+import name.hampton.mike.search.SearchIndexIntf;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -20,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Used to build a SOLR core for a given file path.
+ * Used to build a SOLR core for a given file path.  A SOLR core is similar to a table.
  * 
  * 
  * @author mike.hampton
@@ -82,11 +85,13 @@ public class BuildSOLRCore extends Observable{
 	 *            a path on the machine running this process.
 	 * @throws SolrServerException
 	 * @throws IOException
+	 * @throws InvalidConfigurationException 
+	 * @throws SearchException 
 	 */
-	public SOLRIndexer ensureCore(String pathString, boolean reindexIfExists) throws SolrServerException,
-			IOException {
+	public SearchIndexIntf ensureCore(String pathString, boolean reindexIfExists) throws SolrServerException,
+			IOException, InvalidConfigurationException, SearchException {
 		
-		SOLRIndexer indexer = null;
+		SearchIndexIntf indexer = null;
 		
 		// get an ID for the core based on this path.
 		String coreID = SOLRUtilities.getCoreIDForPath(pathString);
@@ -300,6 +305,8 @@ public class BuildSOLRCore extends Observable{
 				if (createCoreResponse.getStatus() == 0) {
 					notifyCoreCreation(pathString);
 					
+					// indexer = SearchProvider.getSingleton().getSearchIndexIntf(principal);
+					
 					indexer = new SOLRIndexer(urlString, pathString);
 					// Link the observers
 					Observer observer = new Observer(){
@@ -311,7 +318,8 @@ public class BuildSOLRCore extends Observable{
 					};
 					indexer.addObserver(observer);
 					
-					int successCount = indexer.indexDir(pathString);
+					// int successCount = indexer.indexDir(pathString);
+					int successCount = indexer.indexItem(pathString);
 					logger.debug("SOLRIndexer indexDir returned a success count of " + successCount);
 				} else {
 					// bad stuff...
@@ -326,6 +334,7 @@ public class BuildSOLRCore extends Observable{
 		} else if(reindexIfExists){
 			// Effectively reindex the contents.
 			indexer = new SOLRIndexer(urlString,pathString);
+			// indexer = SearchProvider.getSingleton().getSearchIndexIntf(principal);
 			// Link the observers
 			Observer observer = new Observer(){
 				@Override
@@ -336,7 +345,7 @@ public class BuildSOLRCore extends Observable{
 			};
 			indexer.addObserver(observer);
 
-			int successCount = indexer.reIndexDir(pathString);
+			int successCount = indexer.reIndexItem(pathString);
 			logger.debug("SOLRIndexer reIndexDir returned a success count of " + successCount);
 		}
 		return indexer;

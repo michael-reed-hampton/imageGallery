@@ -63,7 +63,8 @@ require(
 									new gallery.GalleryItemStore
 									(
 											{
-												target:"./rest/search"
+												target:"./rest/search",
+												sortParam: "sort"
 											}
 									)
 							//)
@@ -188,13 +189,33 @@ require(
 						
 						// Build the rest of the queryParams here.
 
-						var theQuery = "";
+						// If the query is non-null here, then we must append a '?', or this fails.  This is because of the options, specifically the 'sort'
+						// see JsonRest in the query function where it does the following:
+						//		query += (query || hasQuestionMark ? "&" : "?") + ...
+						//var theQuery = "";
+						var theQuery = "?";
 						if(hasQueryParams){
-							theQuery = "?"; 
+							// theQuery = "?"; 
 							theQuery += ioQuery.objectToQuery(queryParams);
 						}
 						var queryPath = (object.path=="")?"":"/" + object.path;
-						deferred = imageGalleryItemStore.query(queryPath + theQuery);
+						
+						
+						// Start: Define the sort and pagination
+						var options = {};
+						options.start = 0; // this is the first result, start at the beginning!
+						options.count = 20000; // this could be very complicated.  How many do we want per page?  It is really a function of
+											// the amount or screen space they consume, and what is available in the viewport...which could 
+											// change if the user resizes the window.  
+											// TODO: Need a better way to determine the number of items in a page. For now hard code 20, and think about it.
+						options.sort = []; // an array of items to sort by
+						// for now, hardcode this.  We can add this to the user interface later so the user can sort the results.						
+						options.sort.push({attribute:"creation_date", descending: true});
+						options.sort.push({attribute:"last_modified", descending: true});
+						options.sort.push({attribute:"rating", descending: false});
+						// End: Define the sort and pagination
+						
+						deferred = imageGalleryItemStore.query(queryPath + theQuery, options);
 						
 						var onComplete = function(children){containerDetailedInfo.displayChildren(children)}
 						var onError = function(error){

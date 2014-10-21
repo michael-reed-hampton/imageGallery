@@ -1,6 +1,7 @@
 package name.hampton.mike.gallery.solr;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,17 +15,25 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import name.hampton.mike.WatchDir;
 
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * This class watches a directory, monitoring it for changes based on a 
+ * file filter.
+ * 
+ * 
+ * @author mike.hampton
+ *
+ */
 public class DirectoryWatch extends WatchDir {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 	private SOLRIndexer indexer;
 	
-	private IOFileFilter filter;		
+	private FileFilter filter;		
 	private Boolean DELETE = Boolean.FALSE;
 	private Boolean INDEX = Boolean.TRUE;		
 	private Map<File, Boolean> buffer = new ConcurrentHashMap<File, Boolean>();		
@@ -71,9 +80,13 @@ public class DirectoryWatch extends WatchDir {
 	}
 	@Override
 	public void handleModify(WatchEvent<Path> event, Path child) {
-    	if( System.currentTimeMillis()-child.toFile().lastModified() < seconds*1000){
-    		handleCreateModify(child.toFile());
-    	}
+		// Removing this to allow the buffer and the time interval on the 
+		// name.hampton.mike.gallery.solr.DirectoryWatch.IndexingTask to take care of duplicates.
+		// The file will replace itself in the buffer if it is already there.
+		
+    	//if( System.currentTimeMillis()-child.toFile().lastModified() < (System.currentTimeMillis() - seconds*1000) ){
+    	handleCreateModify(child.toFile());
+    	//}
 	}
 	@Override
 	public void handleOverflow(WatchEvent<Path> event, Path child) {
@@ -83,16 +96,16 @@ public class DirectoryWatch extends WatchDir {
 	}
 	
 	public void handleCreateModify(File childFile) {
-		// Put a check in to make sure it was actually modified.  Has to have been changed in the last second
+		// Put a check in to make sure it was actually modified.
 		if(null==filter || filter.accept(childFile)){
 			buffer.put(childFile, INDEX);
 		}
 	}
 
-	public IOFileFilter getFilter() {
+	public FileFilter getFilter() {
 		return filter;
 	}
-	public void setFilter(IOFileFilter filter) {
+	public void setFilter(FileFilter filter) {
 		this.filter = filter;
 	}
 

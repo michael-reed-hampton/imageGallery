@@ -32,7 +32,8 @@ public class ThumbnailServlet extends FileServlet {
 	 */
 	private static final long serialVersionUID = -5038128930274745921L;
 
-	protected boolean shouldAbortOnNonExistantFile(HttpServletRequest request, HttpServletResponse response)
+	@Override
+	protected boolean shouldAbortOnNonExistantFile(HttpServletRequest request, HttpServletResponse response, File fileNoLongerExists)
 			throws IOException {
 		// Do your thing if the file appears to be non-existing.
 		// Throw an exception, or send 404, or show default/warning page, or just ignore it.

@@ -9,7 +9,10 @@ import java.util.List;
 import name.hampton.mike.gallery.GalleryItemFactory;
 import name.hampton.mike.gallery.GalleryItemIntf;
 import name.hampton.mike.gallery.SearchCriteria;
+import name.hampton.mike.gallery.SortField;
 import name.hampton.mike.gallery.exception.InvalidPathException;
+import name.hampton.mike.search.SearchException;
+import name.hampton.mike.search.SearchIntf;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -24,7 +27,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SOLRData {
+public class SOLRData implements SearchIntf{
 
 
 	protected Logger logger = LoggerFactory.getLogger(this.getClass().getName());
@@ -36,7 +39,12 @@ public class SOLRData {
 	private String urlString = "";
 	private File baseDir = null;
 	private SolrServer solrServer = null;
-
+	
+	public SOLRData(File baseDir, String urlString){
+		this.baseDir = baseDir;
+		this.urlString = urlString;
+	}
+	
 	/**
 	 * Interprets SearchCriteria for a SOLR query. 
 	 * 
@@ -77,11 +85,11 @@ public class SOLRData {
 	 * 
 	 * @param searchCriteria
 	 * @return Either the originating object with children populated, or the children alone.
-	 * @throws SolrServerException
 	 * @throws InvalidPathException
 	 * @throws IOException
+	 * @throws SearchException 
 	 */
-	public Object search(SearchCriteria searchCriteria) throws SolrServerException, InvalidPathException, IOException {
+	public Object search(SearchCriteria searchCriteria) throws InvalidPathException, IOException, SearchException {
 		SolrQuery query = new SolrQuery();
 
 		if(null == searchCriteria)
@@ -129,7 +137,6 @@ public class SOLRData {
 			String fqSearchDirNormalizedEscaped = SOLRUtilities.escapeQueryChars(fqSearchDirNormalized);
 			queryString.append("containedin:").append(fqSearchDirNormalizedEscaped);
 		}
-		
 		// Now add specific fields.
 		if(null != searchCriteria.getFields()){
 			queryString.append(" AND (");
@@ -153,50 +160,67 @@ public class SOLRData {
 			queryString.append(")");
 		}
 		
-		//
-		//TODO:  Need to implement sorting and pagination. 
-		//
-		query.setRows(10000);
-		SortClause sortClause = new SortClause("creation_date", ORDER.desc);
-		query.addSort(sortClause);
-		//
-		//TODO:  Need to implement sorting and pagination. 
-		//
-
-		query.set("q",queryString.toString());
-		
-	    QueryResponse response = getSolrServer().query(query);
-	    
-	    SolrDocumentList results = response.getResults();
-	    
-		GalleryItemFactory factory = GalleryItemFactory.getInstance();
-		GalleryItemIntf containerItem = null;
-		containerItem = factory.createGalleryItem(getBaseDir(), searchCriteria.getDirectory());
-		
-		List<GalleryItemIntf> galleryItems = new ArrayList<GalleryItemIntf>();
-		if(containerItem.isAllowsChildren()){
-			containerItem.setChildren(galleryItems);
-		}
-		// Little bit of weirdness here.  If the result of the passed criteria does not indicate a container, and
-		// the searchcriteria does not indicate that the results should be flattened, then there is no reason to 
-		// build the results here, because they will not be returned.
-		if(containerItem.isAllowsChildren() || searchCriteria.isFlatten()){
-		    for (int i = 0; i < results.size(); ++i) {
-		    	SolrDocument result = results.get(i);
-		    	String fieldValue = (String) result.getFieldValue("id");
-				File path = new File(fieldValue);
-				GalleryItemIntf galleryItem = factory.createGalleryItem(getBaseDir(), path);
-				galleryItems.add(galleryItem);		
-		    }
-		}
-		Object returnObject = null; 
-		if(searchCriteria.isFlatten()){
-			returnObject = galleryItems;
+		if(searchCriteria.getStartIndex() > -1){
+			query.setStart(searchCriteria.getStartIndex());
+			query.setRows(searchCriteria.getNumberOfRowsToReturn());
 		}
 		else{
-			returnObject = containerItem;
+			query.setRows(10000);
+		}		
+		if(null != searchCriteria.getSortFields()){
+			List<SortField> sortFields = searchCriteria.getSortFields();
+			for(SortField sortField : sortFields){
+				SortClause sortClause = new SortClause(sortField.getFieldName(), sortField.isDescending()?ORDER.desc:ORDER.asc);
+				query.addSort(sortClause);
+			}			
 		}
-        logger.debug("Returning " + returnObject);
+		else{		
+			SortClause sortClause = new SortClause("creation_date", ORDER.desc);
+			query.addSort(sortClause);
+		}
+
+		query.set("q",queryString.toString());
+
+		Object returnObject = null; 
+		try
+		{
+		    QueryResponse response = getSolrServer().query(query);
+		    
+		    SolrDocumentList results = response.getResults();
+		    
+			GalleryItemFactory factory = GalleryItemFactory.getInstance();
+			GalleryItemIntf containerItem = null;
+			containerItem = factory.createGalleryItem(getBaseDir(), searchCriteria.getDirectory());
+			
+			List<GalleryItemIntf> galleryItems = new ArrayList<GalleryItemIntf>();
+			if(containerItem.isAllowsChildren()){
+				containerItem.setChildren(galleryItems);
+			}
+			// Little bit of weirdness here.  If the result of the passed criteria does not indicate a container, and
+			// the searchcriteria does not indicate that the results should be flattened, then there is no reason to 
+			// build the results here, because they will not be returned.
+			if(containerItem.isAllowsChildren() || searchCriteria.isFlatten()){
+			    for (int i = 0; i < results.size(); ++i) {
+			    	SolrDocument result = results.get(i);
+			    	String fieldValue = (String) result.getFieldValue("id");
+					File path = new File(fieldValue);
+					GalleryItemIntf galleryItem = factory.createGalleryItem(getBaseDir(), path);
+					galleryItems.add(galleryItem);		
+			    }
+			}
+			if(searchCriteria.isFlatten()){
+				returnObject = galleryItems;
+			}
+			else{
+				returnObject = containerItem;
+			}
+	        logger.debug("Returning " + returnObject);
+		}
+		catch(SolrServerException sse)
+		{
+			throw new SearchException(sse);
+		}
+        
 	    
 	    return returnObject;
 	}

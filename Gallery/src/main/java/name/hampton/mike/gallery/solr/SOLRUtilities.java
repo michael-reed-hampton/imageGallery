@@ -5,6 +5,12 @@ import java.io.IOException;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
 
+/**
+ * Utility class for functions that are needed in disparate places.
+ * 
+ * @author mike.hampton
+ *
+ */
 public class SOLRUtilities {
 
 	public static String getCoreIDForPath(String pathString) throws IOException {
@@ -22,6 +28,11 @@ public class SOLRUtilities {
 	//  + - && || ! ( ) { } [ ] ^ " ~ * ? : \
 	public static String escapeQueryChars(String input){
 		return ClientUtils.escapeQueryChars(input);
+	}
+
+	public static String getPathStringForDirectory(File directory) throws IOException {
+		String pathString = directory.getCanonicalPath();
+		return pathString;
 	}
 
 }

@@ -47,6 +47,14 @@
 		<appender-ref ref="FA" />
 		<appender-ref ref="consoleAppender" />
 	</logger>
+	
+	<logger name="name.hampton.mike.gallery.solr.SOLRIndexer" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="CA" />
+		<appender-ref ref="FA" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
+	
 
 	<logger name="test.name.hampton.mike" additivity="false">
 		<level value="WARN" />

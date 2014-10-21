@@ -16,6 +16,9 @@ import java.util.function.UnaryOperator;
 
 import javax.imageio.ImageIO;
 
+import name.hampton.mike.search.SearchException;
+import name.hampton.mike.search.SearchIndexIntf;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.AgeFileFilter;
@@ -46,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Used in indexing the files.
+ * Used in indexing the files for the SOLR search implementation.
  * 
  * This class will index a directory using the fully qualified paths to the files
  * and directories (LINUS style slashes) sd the id for each item.
@@ -65,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * @author mike.hampton
  *
  */
-public class SOLRIndexer extends Observable {
+public class SOLRIndexer extends Observable implements SearchIndexIntf {
 
 	private static OrFileFilter basefilter;
 
@@ -101,20 +104,84 @@ public class SOLRIndexer extends Observable {
 	public String getBaseURL() {
 		return coreSpecificSolrServer.getBaseURL();
 	}
-
-	/**
-	 * Index the path fully
-	 * 
-	 * @param pathString
-	 * @return
-	 * @throws IOException
-	 * @throws SolrServerException
-	 */
-	public int indexDir(String pathString)
-			throws IOException, SolrServerException {
-		return indexDir(pathString, true);
+	
+	@Override
+	public int indexItem(Object itemid) throws SearchException, IOException {
+		int returnValue = -1;
+		File fileItemID = null;
+		if(null != itemid){
+			if( !(itemid instanceof File))
+			{
+				fileItemID = new File(itemid.toString()); // could blow up here
+			}
+			try {
+				if(fileItemID.isDirectory()){
+					returnValue = indexDir(fileItemID);
+				}
+				else {
+					returnValue = indexFilesSolrCell(fileItemID)?1:0;
+				}
+			} catch (SolrServerException sse) {
+				throw new SearchException(sse);
+			}
+		}		
+		else
+		{
+			logger.warn("indexItem called with null.");
+		}
+		return returnValue;
 	}
 	
+	public int reIndexItem(Object itemid) throws SearchException, IOException {
+		int returnValue = -1;
+		File fileItemID = null;
+		if(null != itemid){
+			if( !(itemid instanceof File))
+			{
+				fileItemID = new File(itemid.toString()); // could blow up here
+			}
+			try {
+				if(fileItemID.isDirectory()){
+					returnValue = reIndexDir(fileItemID);
+				}
+				else {
+					returnValue = indexFilesSolrCell(fileItemID)?1:0;
+				}
+			} catch (SolrServerException sse) {
+				throw new SearchException(sse);
+			}
+		}		
+		else
+		{
+			logger.warn("reIndexItem called with null.");
+		}
+		return returnValue;
+	}
+ 
+	// Delete
+	public int deleteItem(Object itemid) throws SearchException, IOException{
+		int returnValue = -1;
+		File fileItemID = null;
+		if(null != itemid){
+			if( !(itemid instanceof File))
+			{
+				fileItemID = new File(itemid.toString()); // could blow up here
+			}
+			else fileItemID = (File)itemid;
+			returnValue = deleteFileSolrCell(fileItemID)?1:0;
+		}		
+		else
+		{
+			logger.warn("reIndexItem called with null.");
+		}
+		return returnValue;
+	}
+
+	public int indexDir(File directory)
+			throws IOException, SolrServerException {
+		return indexDir(directory, true);
+	}
+		
 	/**
 	 * Index the path, check for new/modified.
 	 * 
@@ -124,9 +191,9 @@ public class SOLRIndexer extends Observable {
 	 * @throws IOException
 	 * @throws SolrServerException
 	 */
-	public int reIndexDir(String pathString)
+	public int reIndexDir(File directory)
 			throws IOException, SolrServerException {
-		return indexDir(pathString, false);
+		return indexDir(directory, false);
 	}
 
 	/**
@@ -140,14 +207,12 @@ public class SOLRIndexer extends Observable {
 	 * @throws IOException
 	 * @throws SolrServerException
 	 */
-	public int indexDir(String pathString, boolean fullIndex)
+	public int indexDir(File directory, boolean fullIndex)
 			throws IOException, SolrServerException {
 		
 		int successCount = 0;
 		try
 		{		
-			File directory = new File(pathString);
-
 			// We need to start the directory monitor here.  There should only be one of these per
 			//	core.  This could result in having more than one monitoring the same files if 
 			//	there are paths of interest that are embedded in others.
@@ -157,43 +222,49 @@ public class SOLRIndexer extends Observable {
 			//
 			// The filter here could lead to having multiple watchers on a single directory.
 			// We should be careful to make sure there is one watcher with a flexible filter.
-			DirectoryWatch watch = DirectoryWatchRegistry.getSingleton().getDirectoryWatch(this, pathString);
+			
+			DirectoryWatch watch = DirectoryWatchRegistry.getSingleton().getDirectoryWatch(this, SOLRUtilities.getPathStringForDirectory(directory));
 
-			IOFileFilter filter = getBaseFilter();
+			// This is basically ((file.extension in {accepted extensions}) OR file.isdirectory)
+			IOFileFilter indexFilter = getBaseFilter();
+			// We will NOT add on the age filter to the watch, because there are cases where the file is 'unchanged',
+			// but the watch still needs to process it (for Example in the case of deletions).
+			IOFileFilter watchFilter = indexFilter;
+			
 			if(!fullIndex){
 				// Get the last updated item in the store.  All other items should be at least up to date wrt this date
 				Date lastUpdated = getLastUpdated();
 				
 				/*
 			     * Constructs a new age file filter for files newer than (at or before)
-			     * the lastupdated cutoff date.
+			     * the lastupdated cutoff date. 
 				 */
-				IOFileFilter ageFilter = new NotFileFilter(new AgeFileFilter(lastUpdated));
-
+				IOFileFilter ageFilter = new NotFileFilter(new AgeFileFilter(lastUpdated));				
+				
 				// Add the age filter in to the file filter.  We need a wrapper, because this is not an OR, it is an AND.
-				// if(((file.extension in {accepted extensions}) OR file.isdirectory) AND (file.lastmodified is more recent than lastUpdated))
+				// if(((file.extension in {accepted extensions}) OR file.isdirectory) AND file.lastmodified is more recent than lastUpdated)
 				//
 				// There is additional logic that is added on later, and tied to the 'fullIndex' flag
-				AndFileFilter andFilter = new AndFileFilter();
-				andFilter.addFileFilter(filter);
-				andFilter.addFileFilter(ageFilter);
+				AndFileFilter filterWithAgeAndExists = new AndFileFilter();
+				filterWithAgeAndExists.addFileFilter(indexFilter);
+				filterWithAgeAndExists.addFileFilter(ageFilter);
 
 				// Reseat filter
-				filter = andFilter;
+				indexFilter = filterWithAgeAndExists;
 			}
-			if(!filter.equals(watch.getFilter())){
-				// reset the filter.  We only need to look at the recent updates.
-				watch.setFilter(filter);
+			if(!watchFilter.equals(watch.getFilter())){
+				// reset the filter.
+				watch.setFilter(watchFilter);
 			}
 			watch.startProcessing();
 			
 			Map<File, Integer> countCache = new HashMap<File, Integer>();
 			
-			successCount = runIndexForDir(directory, filter, countCache, fullIndex);
+			successCount = runIndexForDir(directory, indexFilter, countCache, fullIndex);
 			logger.debug("Successfully indexed " + successCount + " items.");
 		}
 		catch(IOException | SolrServerException e){
-			notifyIndexingError(pathString);
+			notifyIndexingError(SOLRUtilities.getPathStringForDirectory(directory));
 		}		
 		return successCount;		
 	}
@@ -479,7 +550,7 @@ public class SOLRIndexer extends Observable {
 			up.setParam("fmap.content", "attr_content");
 			up.setAction(AbstractUpdateRequest.ACTION.COMMIT, true, true);
 			NamedList<Object> result = coreSpecificSolrServer.request(up);
-			logger.debug("Result: " + result);
+			logger.debug("Index Result: " + result);
 			success = true;
 			notifyItemIndexed(solrId);
 		} catch (Exception e) {
@@ -507,12 +578,12 @@ public class SOLRIndexer extends Observable {
 			// Normalize the file path to unix style.
 			String solrId = FilenameUtils.separatorsToUnix(file.getCanonicalPath());
 			UpdateResponse result = coreSpecificSolrServer.deleteById(solrId);
-			logger.debug("Result: " + result);
+			logger.debug("Delete Result: " + result);
 			success = true;
 			notifyItemDeleted(solrId);
 		} catch (Exception e) {
 			// Log the error, but do NOT throw.  We will just keep going.
-			logger.error("Error indexing '" + file.getAbsolutePath()
+			logger.error("Error deleting '" + file.getAbsolutePath()
 					+ "'", e);
 		}
 		return success;

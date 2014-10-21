@@ -104,7 +104,7 @@ public class FileServlet extends AbstractGalleryServlet {
 	
 	        // Check if file is actually supplied to the request URL.
 	        if (requestedFile == null) {
-	            if(shouldAbortOnNonExistantFile(request, response))
+	            if(shouldAbortOnNonExistantFile(request, response, null))
 	            {
 	            	return;
 	            }
@@ -115,7 +115,7 @@ public class FileServlet extends AbstractGalleryServlet {
 	
 	        // Check if file actually exists in filesystem.
 	        if (!file.exists()) {
-	            if(shouldAbortOnNonExistantFile(request, response))
+	            if(shouldAbortOnNonExistantFile(request, response, file))
 	            {
 	            	return;
 	            }
@@ -354,7 +354,7 @@ public class FileServlet extends AbstractGalleryServlet {
 	    }
     }
 
-	protected boolean shouldAbortOnNonExistantFile(HttpServletRequest request, HttpServletResponse response)
+	protected boolean shouldAbortOnNonExistantFile(HttpServletRequest request, HttpServletResponse response, File fileNoLongerExists)
 			throws IOException {
 		// Do your thing if the file appears to be non-existing.
 		// Throw an exception, or send 404, or show default/warning page, or just ignore it.

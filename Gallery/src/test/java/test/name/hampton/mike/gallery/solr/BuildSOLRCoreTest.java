@@ -1,11 +1,17 @@
 package test.name.hampton.mike.gallery.solr;
 
+import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Observable;
 import java.util.Observer;
 
+import name.hampton.mike.gallery.ApplicationConfiguration;
+import name.hampton.mike.gallery.exception.InvalidConfigurationException;
 import name.hampton.mike.gallery.solr.BuildSOLRCore;
+import name.hampton.mike.search.SearchException;
 
+import org.apache.http.auth.BasicUserPrincipal;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,10 +34,21 @@ public class BuildSOLRCoreTest extends TestCase {
 	// look at http://lucidworks.com/blog/indexing-with-solrj/
 	Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-	public void testEnsureCore() throws SolrServerException, IOException{
+	public void testEnsureCore() throws SolrServerException, IOException, InvalidConfigurationException, SearchException{
+		
+		ApplicationConfiguration.getSingleton().setDefaultConfigurationKey("testdefaultKey");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.BASE_DIR, "C:\\Users\\mike.hampton\\Pictures\\temp");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.SOLR_URL, "http://localhost:8983/solr");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.THUMBNAIL_DIR, "C:\\temp");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.THUMBNAIL_HEIGHT, "100");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.THUMBNAIL_WIDTH, "100");
+		
 		if(true){ // change this to run the test.  I did not want to run it every time I build
 			long start = System.currentTimeMillis();
-			BuildSOLRCore solrCoreBuilder = new BuildSOLRCore("http://localhost:8983/solr");
+			Principal principal = new BasicUserPrincipal("user"); 
+
+			String solrURL = ApplicationConfiguration.getSingleton().lookupConfigurationValue(principal.getName(), name.hampton.mike.gallery.GalleryApplication.SOLR_URL);
+			BuildSOLRCore solrCoreBuilder = new BuildSOLRCore(solrURL);
 			
 			Observer observer = new Observer(){
 				@Override
@@ -40,7 +57,6 @@ public class BuildSOLRCoreTest extends TestCase {
 				}
 			};
 			solrCoreBuilder.addObserver(observer );
-			
 			
 			solrCoreBuilder.ensureCore("C:\\Users\\mike.hampton\\Pictures\\temp", false);
 			// solrCoreBuilder.ensureCore("C:\\Users\\mike.hampton\\Pictures");
@@ -51,10 +67,21 @@ public class BuildSOLRCoreTest extends TestCase {
 		assertTrue(true);		
 	}
 
-	public void testEnsureCoreWithReindex() throws SolrServerException, IOException{
+	public void testEnsureCoreWithReindex() throws SolrServerException, IOException, InvalidConfigurationException, SearchException{
+		
+		ApplicationConfiguration.getSingleton().setDefaultConfigurationKey("testdefaultKey");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.BASE_DIR, "C:\\Users\\mike.hampton\\Pictures\\temp");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.SOLR_URL, "http://localhost:8983/solr");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.THUMBNAIL_DIR, "C:\\temp");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.THUMBNAIL_HEIGHT, "100");
+		ApplicationConfiguration.getSingleton().setConfigurationValue("testdefaultKey", name.hampton.mike.gallery.GalleryApplication.THUMBNAIL_WIDTH, "100");
+
 		if(true){ // change this to run the test.  I did not want to run it every time I build
 			long start = System.currentTimeMillis();
-			BuildSOLRCore solrCoreBuilder = new BuildSOLRCore("http://localhost:8983/solr");
+			Principal principal = new BasicUserPrincipal("user"); 
+
+			String solrURL = ApplicationConfiguration.getSingleton().lookupConfigurationValue(principal.getName(), name.hampton.mike.gallery.GalleryApplication.SOLR_URL);
+			BuildSOLRCore solrCoreBuilder = new BuildSOLRCore(solrURL);
 			
 			Observer observer = new Observer(){
 				@Override
@@ -64,8 +91,10 @@ public class BuildSOLRCoreTest extends TestCase {
 			};
 			solrCoreBuilder.addObserver(observer );
 			
-			solrCoreBuilder.ensureCore("C:\\Users\\mike.hampton\\Pictures\\temp", true);
-			// solrCoreBuilder.ensureCore("C:\\Users\\mike.hampton\\Pictures");
+			String myBaseDir = ApplicationConfiguration.getSingleton().lookupConfigurationValue(principal.getName(), name.hampton.mike.gallery.GalleryApplication.BASE_DIR);
+			File myBaseDirFile = new File(myBaseDir);
+			myBaseDir = myBaseDirFile.getCanonicalPath();
+			solrCoreBuilder.ensureCore(myBaseDir, true);
 			long end = System.currentTimeMillis();
 			
 			System.out.println("It took " + ((end-start)/1000) + " seconds.");

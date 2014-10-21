@@ -39,25 +39,25 @@ What It Does
         	Rating (might be null)
         	
         	
-Current State
+Features Implemented
 -----------------------
 Put in a filter that checks to see if the application is configured properly, if not, it redirects to the application configuration page, or the users
 	personal configuration page depending on the configuration of the 'ConfigurationCheckFilter'.  Did some cool stuff here based on roles, and also
 	started a pretty cool namespaced replacement utility (NamespaceVariableResolver).
 Got the dojo tree working, and even managed to handle session expiration errors.  This is done by "rewiring" the 'onSubmit' of the form in the login page to
-	be asynchronous, and then hooking the response to the originally calling function.  See index.html, specifically the 'buildOnError' javascript function.
+	be asynchronous, and then hooking the response to the originally calling function.  See GalleryItemStore.js, specifically the 'buildOnError' javascript function.
 	Had to do some weird magic here, and it makes some assumptions, but it is pretty flexible.  It will need to be abstracted further though for use in
 	other parts of the application.
-Need to have a way for it to kick off a process that reads and indexes the entire image tree it is configured to point at.  This would index the metadata from the images,
-	and build up a list of terms from the metadata.  This list would be useful to help a user select relevant terms.
-	This needs to get kicked off from the configuration initiation.
+Have a way for it to kick off a process that reads and indexes the entire image tree it is configured to point at.  This indexes the metadata from the images,
+	but still needs to build up a list of terms from the metadata.  This list would be useful to help a user select relevant terms.
+	This gets kicked off from the configuration initiation.
 	At startup:
-		If the path is indexed, we need to be able to find out WHEN it was last updated, and feed any changed files in the path hierarchy back to the index again.
-			date=beginningoftime
-			if alreadyindexed date=lasttimeindexed
-			files = files changed since date
-			index files
-	When a path is added, we need to add the index first.  I have this in name.hampton.mike.gallery.solr.BuildSOLRCore.ensureCore(String)
+		If the path is indexed, we find out WHEN it was last updated by asking the index itself for the last item updated. We then feed any files changed since 
+		that time to the index again.
+	When a user adds a new path we add the index first.  Current IMPL is SOLR and the index is a 'CORE' in SOLR vernacular.  I have this in 
+		name.hampton.mike.gallery.solr.BuildSOLRCore.ensureCore(String).  This is not a great implementation due to the limitations of the way SOLR 
+		builds a new index.  It does a file copy and some other things that are a little pale.  If this functionality was inside the SOLR system (why is
+		it not there?), it would be ok.
 	We need a way to let the user know what the status of the index is.
 		
 	
@@ -241,6 +241,72 @@ Changed dojo urls to use google for now.  I saved a copy of the index.html and l
 
 Currently working on:
 -----------------------
+Need to do pagination for the carousel and the thumbnails.
+	First - how do we make JsonRest ask for a range? http://dojotoolkit.org/reference-guide/1.10/dojo/store/JsonRest.html#id7
+		See line 168 of JsonRest.js
+			Inside query: function(query, options), the 'options' paramater is used to get the pagination info.
+				options.start - start of range
+				options.count - number of items to return
+				options.sort - the sort of the return.  An array.
+					Each item in the array looks like:
+						sort.descending - true or false, obvious use here...
+						sort.attribute - the attribute name presumably 
+					Ends up in the url.  Examples -  "sort(+foo, -bar)"
+		The SOLR back end search now accepts pagination info with the above contract. (See SolrDataREST.java)  
+		The 'galleryApp.js' sends it for searches, but it is not configurable, and you cannot get past the first page of thumbnails.
+			Want to change the thumbnails page to be infinate scroll, side to side.  I will need to figureout how many thumbnails can go
+			in the viewport at a time.  This will depend on the size of the viewport, and the size of the thumbnails.  If the user resizes the 
+			viewport, will need to recalculate.  Also, how much should I load ahead, and how far back should I maintain?
+			NOTE:  Do not think of this as pages.  It should be a smoother scroll than pages. 					
+		
+Cleaning up the indexing.
+	Look at expanding on stopwords and synonyms		
+		
+Presenting the user with search aids, like faceting
+	see http://wiki.apache.org/solr/SimpleFacetParameters#facet.query_:_Arbitrary_Query_Faceting
+	http://localhost:8983/solr/C__Users_mike.hampton_Pictures/select?q=*:*&facet.pivot=cat,popularity,inStock
+   		&facet.pivot=popularity,cat&facet=true&facet.field=cat&facet.limit=5
+   		&rows=0&wt=json&indent=true&facet.pivot.mincount=2
+
+	This query will return a the 'suggestions' for searches
+		http://localhost:8983/solr/C__Users_mike.hampton_Pictures/select?q=*:*&facet=on&facet.field=windows_xp_keywords&rows=0&wt=json&indent=true
+		http://192.168.1.110/solr/_media_MyPassport_data_Pictures/select?q=*:*&facet=on&facet.field=windows_xp_keywords&rows=0&wt=json&indent=true
+			{
+			  "responseHeader":{
+			    "status":0,
+			    "QTime":19,
+			    "params":{
+			      "q":"*:*",
+			      "facet.field":"windows_xp_keywords",
+			      "indent":"true",
+			      "rows":"0",
+			      "facet":"on",
+			      "wt":"json"}},
+			  "response":{"numFound":26575,"start":0,"docs":[]
+			  },
+			  "facet_counts":{
+			    "facet_queries":{},
+			    "facet_fields":{
+			      "windows_xp_keywords":[
+			        "portugal",1568,
+			        "wolfpack",747,
+			        "alyssa",616,
+			        "ireland",606,
+			        "jessica",556,
+			        "the",452,
+			        "garden",422,
+			        ...
+			        "karate",31,
+			        "over",31]},
+			    "facet_dates":{},
+			    "facet_ranges":{},
+			    "facet_intervals":{}}}		
+		In the case of a lot of items, it may return too many.  
+			You can add a limit on the number of facets returned with 'facet.limit'
+				http://192.168.1.110/solr/_media_MyPassport_data_Pictures/select?q=*:*&facet=on&facet.field=windows_xp_keywords&rows=0&wt=json&indent=true&facet.limit=5
+			You can restrict the frequency of items returned with 'facet.mincount'
+				http://192.168.1.110/solr/_media_MyPassport_data_Pictures/select?q=*:*&facet=on&facet.field=windows_xp_keywords&rows=0&wt=json&indent=true&facet.mincount=100
+
 
 
 
@@ -249,6 +315,7 @@ Currently working on:
 ToDo
 -----------------------
 Need to do pagination for the carousel and the thumbnails
+Need to show number of results somewhere, if available
 Need to build lists of frequent keys, and frequent values for the solr index.  This is probably something to do in tandem with the solr schema.xml
 
 Also try to make use of HTML5 capabilities:
