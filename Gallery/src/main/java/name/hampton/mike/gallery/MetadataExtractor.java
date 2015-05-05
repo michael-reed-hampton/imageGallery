@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.apache.commons.imaging.ImageReadException;
 import org.apache.commons.imaging.Imaging;
-import org.apache.commons.imaging.common.IImageMetadata;
+import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.common.RationalNumber;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegPhotoshopMetadata;
@@ -48,7 +48,7 @@ public class MetadataExtractor {
 
     public Map<String, Object> extractImageMetaData(final InputStream inputStream, Map<String, Object> metadataH) throws ImageReadException, IOException {
         // get all metadata stored in EXIF format (ie. from JPEG or TIFF).
-        final IImageMetadata metadata = Imaging.getMetadata(inputStream, null);
+        final ImageMetadata metadata = Imaging.getMetadata(inputStream, null);
 
         if (metadata instanceof JpegImageMetadata) {
             final JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;

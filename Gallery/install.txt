@@ -1,19 +1,25 @@
-
-
-
-
-
-
-
 This is a web application, so deployments can be done in a numebr of ways.
 
 My test rig is a CentOS Linux server.
 
+Install CentOS 7 Minimal (I used a VirtualBoxInstance)
+	http://mirrors.greenmountainaccess.net/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1503-01.iso
+
+I install the GNOME Desktop Environment, because I like GUI's
+	> yum groupinstall "GNOME Desktop" "Graphical Administration Tools"
+	Enable GUI on system start up. In CentOS 7,  systemd uses ‘targets’ instead of
+	runlevels; /etc/inittab file is no more used to change run levels. Issue the following
+	command to enable the GUI on system start.
+	> ln -sf /lib/systemd/system/runlevel5.target /etc/systemd/system/default.target
+	reboot
+
+
 On the centos server
 
-	I have apache httpd running.
+	Instal apache httpd
+		yum -y install httpd
 	
-		in /etc/httpd/conf/httpd.conf, I have the following to allow access to solr, tomcat and dojo
+		in /etc/httpd/conf/httpd.conf, add the following to allow access to solr, tomcat and dojo
 	
 		ProxyPass         /gallery  http://localhost:8080/gallery
 		ProxyPassReverse  /gallery  http://localhost:8080/gallery
@@ -24,6 +30,9 @@ On the centos server
 		ProxyPass         /solr  http://localhost:8983/solr
 		ProxyPassReverse  /solr  http://localhost:8983/solr
 
+	Install Tomcat (8?)
+		Deploy the Gallery
+		Deploy dojo
 		
 	I have tomcat8 running
 		This is where I have the Gallery deployed, and I have dojo deployed there as well.
@@ -40,21 +49,23 @@ On the centos server
 					cd /usr/local
 					tar -zxvf /home/mike.hampton/Downloads/solr-4.10.1.tgz
 	
-			I copied solr-image-index.zip to the linux machine, and unzipped it to /usr/local/solr-image-index
+			Copy solr-image-index.zip to the linux test machine, and unzip it to /usr/local/solr-image-index
 				cd /usr/local 
-				unzip /media/MyPassport/data/solr-image-index.zip
+				unzip <path to file>/solr-image-index.zip
 	
-			I made the command script to start solr: solr-image-index/runSolr.sh
-				Made sure it was executable
+			The command script to start solr is in solr-image-index/runSolr.sh
+				Made sure it is executable
 					chmod +x solr-image-index/runSolr.sh
-				This has the correct paths to use this directory, plus one additional property '-Dsolr.appDir="K:/solr-4.10.0"'.  This is used below.
+				This has the correct paths to use this directory, plus one additional property
+				'-Dsolr.appDir="<solr-home>"'.  This is used in solr-image-index/solr/collection1/conf/solrconfig.xml
 	
-			I made the command script to stop solr: solr-image-index/stopSolr.sh	
-				Made sure it was executable
+			The command script to stop solr is solr-image-index/stopSolr.sh
+				Made sure it is executable
 					chmod +x solr-image-index/stopSolr.sh
-	
-			Had to add the line
-			"192.168.1.110 ISS203716" to /etc/hosts, because it was not already there.
+
+			Ensure the machine IP is in /etc/hosts
+				Had to add the line
+					"192.168.1.110 ISS203716" to /etc/hosts
 			
-			http://localhost:8983/solr is the web interface		
+			http://localhost:8983/solr is the web interface for solr
 
