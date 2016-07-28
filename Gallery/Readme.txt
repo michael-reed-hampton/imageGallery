@@ -1,4 +1,4 @@
-Web App.
+  Web App.
 
 What It Does
 ------------------------ 
@@ -74,7 +74,9 @@ I have been running this on jetty and Tomcat.
 	--------
 	Need to start solr first.  Currently using a simple install of solr.
 	cd /d K:\research\solr-image-index
-	runSolr  
+	runSolr
+
+	https://github.com/ksclarke/solr-jetty-maven
 
 	Jetty
 	-----

@@ -16,7 +16,7 @@ I install the GNOME Desktop Environment, because I like GUI's
 
 On the centos server
 
-	Instal apache httpd
+	Install apache httpd
 		yum -y install httpd
 	
 		in /etc/httpd/conf/httpd.conf, add the following to allow access to solr, tomcat and dojo
